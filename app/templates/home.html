@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet"  href="../static/css/main.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body class="bg-gray-700">
+    <h1 class="text-3xl ">Hello World!</h1>
+    <table class="border-2 rounded-sm shadow-md border-black">
+        <thead class="border-2 border-black">
+            <th>Id</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Password</th>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>
+                    {{user.id}}
+                </td>
+                <td>{{user.name}}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.password }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
