@@ -5,8 +5,7 @@ main = Blueprint('main', __name__)
 
 @main.route('/')
 def land():
-    users = Item.query.all()
-    return render_template('home.html', users=users)
+    return render_template('home.html')
 
 @main.route('/about/<username>')
 def about(username):
@@ -16,6 +15,10 @@ def about(username):
         {'id':3, 'name' : 'Royal', 'email':'Royal@abd.in' }
     ]
     return render_template('about.html', name = username, users=users)
+
+@main.route('/login')
+def login():
+    return render_template('login.html')
 
 @main.route('/page1')
 def page1():
