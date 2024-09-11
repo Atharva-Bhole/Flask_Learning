@@ -1,16 +1,31 @@
 from flask import Flask
 from app.models import db
 from dotenv import load_dotenv
-from app.routes import main
+from flask_mail import Mail
+from flask_bcrypt import Bcrypt
 import os
 load_dotenv()
 
+
+bcrypt = Bcrypt()
 
 def create_app():
 
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = os.getenv('TRACK_MODIFICATIONS')
+    app.config['SECRET_KEY'] = str(os.getenv('SECRET_KEY'))
+    app.config['MAIL_SERVER'] = os.getenv("MAIL_SERVER")
+    app.config['MAIL_PORT'] = 465 
+    app.config['MAIL_USERNAME'] = 'royalbhole@outlook.com'
+    app.config['MAIL_PASSWORD'] = 'AtharvaBhole@123'
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USE_SSL'] = False
+    mail = Mail()
+    mail.init_app(app)
     db.init_app(app)
+    bcrypt.init_app(app)
+    app.mail = mail
+    from app.routes import main
     app.register_blueprint(main)
     return app
