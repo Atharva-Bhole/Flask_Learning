@@ -4,10 +4,12 @@ from dotenv import load_dotenv
 from flask_mail import Mail
 from flask_bcrypt import Bcrypt
 import os
+from flask_mail import Mail, Message
 load_dotenv()
 
 
 bcrypt = Bcrypt()
+mail = Mail()
 
 def create_app():
 
@@ -17,8 +19,8 @@ def create_app():
     app.config['SECRET_KEY'] = str(os.getenv('SECRET_KEY'))
     app.config['MAIL_SERVER'] = os.getenv("MAIL_SERVER")
     app.config['MAIL_PORT'] = 465 
-    app.config['MAIL_USERNAME'] = 'royalbhole@outlook.com'
-    app.config['MAIL_PASSWORD'] = 'AtharvaBhole@123'
+    app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
+    app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
     app.config['MAIL_USE_TLS'] = True
     app.config['MAIL_USE_SSL'] = False
     mail = Mail()

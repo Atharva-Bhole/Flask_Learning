@@ -1,18 +1,20 @@
-from flask import Flask, render_template, redirect, Blueprint, url_for, flash, request
+from flask import Flask, render_template, redirect, Blueprint, session, url_for, flash, request
 from app.models import db, Users
 from app import  bcrypt
 from flask import current_app as app
-from .gmail_service import send_email
-from googleapiclient.errors import HttpError
-
 from flask_mail import Message
-from app.forms import LoginForm, RegisterForm
+from flask import current_app as app
+
+from app.forms import LoginForm, RegisterForm, VerifyForm
+from app.oauth import load_oauth_credentials, send_gmail_api_message
 main = Blueprint('main', __name__)
 
 
 @main.route('/')
 def land():
-    return render_template('home.html')
+    msg = Message('Test Email', sender='atharvabhole239@gmail.com', recipients=['atharvabholeofficial@gmail.com'])
+    msg.body = 'This is a Test Mail'
+    app.mail.send(msg)
 
 @main.route('/about/<username>')
 def about(username):
@@ -48,53 +50,46 @@ def page1():
         user_to_create = Users(username=form.username.data,email = form.email.data,password = hashedpwd)
         db.session.add(user_to_create)
         db.session.commit()
-        print("Hello")
-        send_verification_email(user_to_create)
-        print('Hi')
-        print("Verification mail Sent")
+
+        token = user_to_create.get_verification_token()
+        subject = 'Email Verification'
+        body = f'To verify your account, visit the following link: {url_for("main.verify", token=token, _external=True)}'
+        send_gmail_api_message(user_to_create.email, subject, body)
+
         return redirect(url_for('main.login'))
     else:
         print("form not validated")
     return render_template('register.html', form=form)
 
+@main.route('/oauth2callback')
+def oauth2callback():
+    flow = load_oauth_credentials()
+    flow.fetch_token(authorization_response=request.url)
+    creds = flow.credentials
+    session['token'] = creds.token
+    flash("OAuth authentication successful!", 'success')
+    return redirect(url_for('home'))
 
 @main.route('/verify/<token>')
 def verify(token):
-    user = Users.verify_token(token)
-    if user is None:
-        flash("Invalid Token or expired token")
-        return redirect(url_for('main.register'))
-    user.is_verified = True
-    db.session.commit()
-    flash("Verified successfully")
-    print("Success")
-    return redirect(url_for('main.login'))
+    form = VerifyForm()
+    if form.validate_on_submit():
 
-from sqlalchemy.orm.exc import ObjectDeletedError
-
-def send_verification_email(user):
-    try:
-        # Retrieve the user from the database
-        user = Users.query.get(user.id)
+        user = Users.verify_token(token)
         if user is None:
-            raise ValueError("User does not exist.")
-        
-        # Generate the verification token
-        token = user.get_verification_token()
-        print("Token Worked")
-        
-        # Construct the email subject and body
-        subject = 'Email Verification'
-        body = f'''To verify your account, visit the following link:
-{url_for('main.verify', token=token, _external=True)}
-If you did not make this request, simply ignore this email.
-'''
+            flash("Invalid Token or expired token")
+            return redirect(url_for('main.register'))
+        user.is_verified = True
+        db.session.commit()
+        flash("Verified successfully")
+        print("Success")
+        return redirect(url_for('main.verifypage'))
 
-        # Send the email using Google API
-        send_email(subject, body, user.email)
-        print("Message Sent")
 
-    except ValueError as e:
-        print(f"Error: {e}")
-    except HttpError as e:
-        print(f"An error occurred: {e}")
+def send_verification_email(user, token):
+    msg = Message('Email Verification', sender='noreply@demo.com', recipients=[user.email])
+    msg.body = f'''To verify your account, click on the following link:
+                {url_for('verify_email', token=token, _external=True)}
+                If you did not request this, please ignore this email.
+                '''
+    mail.send(msg)

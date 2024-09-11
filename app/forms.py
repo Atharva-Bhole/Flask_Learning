@@ -12,3 +12,6 @@ class RegisterForm(FlaskForm):
     email = StringField('email', validators=[DataRequired()])
     password = PasswordField('password', validators=[DataRequired()])
     submit = SubmitField('Register')
+
+class VerifyForm(FlaskForm):
+    submit = SubmitField('Verify your email')
