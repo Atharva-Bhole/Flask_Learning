@@ -11,13 +11,7 @@ main = Blueprint('main', __name__)
 
 @main.route('/')
 def land():
-    msg = Message('Test Email', sender=app.config.get('MAIL_DEFAULT_SENDER'), recipients=['atharvabholeofficial@gmail.com'])
-    msg.body = 'This is a Test Mail'
-    try:
-        app.mail.send(msg)
-        return "Email sent!"
-    except Exception as e:
-        return str(e)
+    return render_template('base.html')
 
 @main.route('/about/<username>')
 def about(username):
@@ -72,7 +66,7 @@ def register():
         otp = generateOTP()
          
         msg = Message(subject='Hello from the other side!',
-                  recipients=['atharvabholeofficial@gmail.com'])
+                  recipients=[email])
         msg.body = f"This mail is for verification please enter the otp {otp} on the page"
         try:
             app.mail.send(msg)
