@@ -57,7 +57,7 @@ def register():
             print("All fields must be filled out.", "error")
             return render_template('register.html', form=form)
         
-        sender = app.config.get('MAIL_USERNAME')  # Use get() to avoid KeyError
+        sender = app.config.get('MAIL_USERNAME')  
         
         if sender is None:
             print("Mail sender is not configured.", "error")

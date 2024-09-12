@@ -12,7 +12,6 @@ mail = Mail()
 def create_app():
     app = Flask(__name__)
     
-    # Load configuration
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = os.getenv('TRACK_MODIFICATIONS')
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
@@ -25,11 +24,11 @@ def create_app():
     app.config['MAIL_USE_SSL'] = False
     app.config['MAIL_DEBUG'] = os.getenv('MAIL_DEBUG')
 
-    # Initialize extensions
+    
     mail.init_app(app)
     db.init_app(app)
     bcrypt.init_app(app)
-    # Register blueprints
+    
     from app.routes import main
     app.register_blueprint(main)
     app.extensions['bcrypt'] = bcrypt
