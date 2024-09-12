@@ -3,12 +3,16 @@ from app.models import db, Users
 from app import  bcrypt
 from flask import current_app as app
 from flask_mail import Message
+from flask_mail import Mail, Message
 from flask import current_app as app
-
+from dotenv import load_dotenv
+import os
 from app.forms import LoginForm, RegisterForm, VerifyForm
-from app.oauth import load_oauth_credentials, send_gmail_api_message
+load_dotenv()
+
 main = Blueprint('main', __name__)
 
+mail = Mail(app)
 
 @main.route('/')
 def land():
@@ -54,21 +58,12 @@ def page1():
         token = user_to_create.get_verification_token()
         subject = 'Email Verification'
         body = f'To verify your account, visit the following link: {url_for("main.verify", token=token, _external=True)}'
-        send_gmail_api_message(user_to_create.email, subject, body)
-
+        
         return redirect(url_for('main.login'))
     else:
         print("form not validated")
     return render_template('register.html', form=form)
 
-@main.route('/oauth2callback')
-def oauth2callback():
-    flow = load_oauth_credentials()
-    flow.fetch_token(authorization_response=request.url)
-    creds = flow.credentials
-    session['token'] = creds.token
-    flash("OAuth authentication successful!", 'success')
-    return redirect(url_for('home'))
 
 @main.route('/verify/<token>')
 def verify(token):
@@ -87,7 +82,7 @@ def verify(token):
 
 
 def send_verification_email(user, token):
-    msg = Message('Email Verification', sender='noreply@demo.com', recipients=[user.email])
+    msg = Message('Email Verification', sender=os.getenv("MAIL_USERNAME"), recipients=[user.email])
     msg.body = f'''To verify your account, click on the following link:
                 {url_for('verify_email', token=token, _external=True)}
                 If you did not request this, please ignore this email.
