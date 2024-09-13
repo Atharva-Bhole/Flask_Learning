@@ -1,6 +1,5 @@
 from flask import Flask, render_template, redirect, Blueprint, session, url_for, flash, request, session
 from app.models import db, Users
-import math
 from flask_mail import Message
 from flask import current_app as app
 import random
@@ -24,7 +23,8 @@ def about(username):
 
 @main.route('/firstpage')
 def firstpage():
-    return render_template('firstpage.html', user=request.args.get('user'))
+    user = session.get('username')
+    return render_template('firstpage.html', user=user)
 
 @main.route('/login', methods=['GET', 'POST'])
 def login():
@@ -35,6 +35,7 @@ def login():
         user = Users.query.filter_by(email=email).first()
         if user and app.extensions['bcrypt'].check_password_hash(user.password, password):
             if user.is_verified:
+                session['username'] = user.username
                 return redirect(url_for('main.firstpage'))
             else:
                 print("User not verified")
@@ -65,7 +66,7 @@ def register():
         
         otp = generateOTP()
          
-        msg = Message(subject='Hello from the other side!',
+        msg = Message(subject='Verify Your Email',
                   recipients=[email])
         msg.body = f"This mail is for verification please enter the otp {otp} on the page"
         try:
