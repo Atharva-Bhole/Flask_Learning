@@ -1,6 +1,5 @@
 from flask import Flask
 from app.models import db
-import pyrebase
 from dotenv import load_dotenv
 from flask_mail import Mail
 from flask_bcrypt import Bcrypt
@@ -12,16 +11,6 @@ bcrypt = Bcrypt()
 mail = Mail()
 def create_app():
     app = Flask(__name__)
-    config = {
-        "databaseURL" : os.getenv('FIREBASE_DATA_URL'),
-        "apiKey" : os.getenv('API_KEY'),
-        "authDomain" : os.getenv('AUTH_DOMAIN'),
-        "projectID" : os.getenv('PROJECT_ID'),
-        "storageBucket" : os.getenv('STORAGE_BUCKET'),
-        'messagingSenderID': os.getenv('MESSAGING_SENDER_ID'),
-        "appId": os.getenv("APP_ID"),
-        'measurementId' : os.getenv('MEASUREMENT_ID')
-    }
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL")
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = os.getenv('TRACK_MODIFICATIONS')
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')

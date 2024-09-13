@@ -1,14 +1,17 @@
 import pyrebase
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 config = {
-    "databaseURL": 'https://console.firebase.google.com/u/0/project/flask-6eca7/database/flask-6eca7-default-rtdb/data/~2F',
-    "apiKey": "AIzaSyBJSiA5CGrnOiZGOlp6jjqFRYlkwf078mY",
-  "authDomain": "flask-6eca7.firebaseapp.com",
-  "projectId": "flask-6eca7",
-  "storageBucket": "flask-6eca7.appspot.com",
-  "messagingSenderId": "366006503606",
-  "appId": "1:366006503606:web:7715460af9e58015cafe17",
-  "measurementId": "G-V5V0L6E5LB"
+    "databaseURL": os.getenv("FIREBASE_DATA_URL"),
+    "apiKey": os.getenv("API_KEY"),
+  "authDomain": os.getenv('AUTH_DOMAIN'),
+  "projectId": os.getenv('PROJECT_ID'),
+  "storageBucket": os.getenv('STORAGE_BUCKET'),
+  "messagingSenderId": os.getenv("MESSAGING_SENDER_ID"),
+  "appId": os.getenv("APP_ID"),
+  "measurementId": os.getenv("MEASUREMENT_ID")
 }
 
 firebase = pyrebase.initialize_app(config)
