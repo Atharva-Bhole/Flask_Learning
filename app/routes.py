@@ -1,16 +1,18 @@
-from flask import Flask, render_template, redirect, Blueprint, session, url_for, flash, request, session
+from flask import Flask, render_template, redirect, Blueprint, session, url_for, session
 from app.models import db, Users
 from flask_mail import Message
 from flask import current_app as app
 import random
+from . import firebase as fb
 from app.forms import LoginForm, RegisterForm, VerifyForm
 
 
 main = Blueprint('main', __name__)
-
 @main.route('/')
 def land():
     return render_template('base.html')
+
+
 
 @main.route('/about/<username>')
 def about(username):
@@ -23,8 +25,9 @@ def about(username):
 
 @main.route('/firstpage')
 def firstpage():
-    user = session.get('username')
+    user = session.get('user')
     return render_template('firstpage.html', user=user)
+
 
 @main.route('/login', methods=['GET', 'POST'])
 def login():
@@ -32,58 +35,84 @@ def login():
     if form.validate_on_submit():
         email = form.email.data
         password = form.password.data
-        user = Users.query.filter_by(email=email).first()
-        if user and app.extensions['bcrypt'].check_password_hash(user.password, password):
-            if user.is_verified:
-                session['username'] = user.username
-                return redirect(url_for('main.firstpage'))
-            else:
-                print("User not verified")
+        print(password)
+        print('try executed')
+        user=fb.auth.sign_in_with_email_and_password(email, password)
+        print('user fetched')
+        info = fb.auth.get_account_info(user['idToken'])
+        print('info fetched')
+        email_verified = info['users'][0]['emailVerified']
+        print('email verified')
+        print(user)
+        print(info)
+        print(email_verified)
+        if email_verified:
+            print("email verified")
+            session['user'] = email
+            print('session created')
+            return redirect(url_for('main.firstpage'))
         else:
-            print("Wrong password")
-    else:
-        print("Form not validated")
-    return render_template('login.html', form=form)
+            print("Email Not Verified")
+            return "<h1>Please Verify Your Mail</h1>"
+    return render_template("login.html", form=form)
 
 
-@main.route('/register', methods=['GET', 'POST'])
+@main.route('/register', methods=['GET','POST'])
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
-        username = form.username.data
         email = form.email.data
         password = form.password.data
-        
-        if not username or not email or not password:
-            print("All fields must be filled out.", "error")
-            return render_template('register.html', form=form)
-        
-        sender = app.config.get('MAIL_USERNAME')  
-        
-        if sender is None:
-            print("Mail sender is not configured.", "error")
-            return render_template('register.html', form=form)
-        
-        otp = generateOTP()
-         
-        msg = Message(subject='Verify Your Email',
-                  recipients=[email])
-        msg.body = f"This mail is for verification please enter the otp {otp} on the page"
-        try:
-            app.mail.send(msg)
-            print("Mail sent")
-            print(otp)
-            session['username'] = username
-            session['email'] = email
-            session['password'] = password
-            session['otp'] = otp
-            return redirect(url_for('main.verifyotp'))
-        except Exception as e:
-            print(f"Failed to send email: {e}", "error")
-            return render_template('register.html', form=form)
+        user = fb.auth.create_user_with_email_and_password(email, password)
+        session['user'] = email
+        print("Try block executed")
+        fb.auth.send_email_verification(user['idToken'])
+        print("Mail Sent")
+        return redirect(url_for('main.login'))
+
     else:
         print("Form not validated")
     return render_template('register.html', form=form)
+        
+
+# @main.route('/register', methods=['GET', 'POST'])
+# def register():
+#     form = RegisterForm()
+#     if form.validate_on_submit():
+#         username = form.username.data
+#         email = form.email.data
+#         password = form.password.data
+        
+#         if not username or not email or not password:
+#             print("All fields must be filled out.", "error")
+#             return render_template('register.html', form=form)
+        
+#         sender = app.config.get('MAIL_USERNAME')  
+        
+#         if sender is None:
+#             print("Mail sender is not configured.", "error")
+#             return render_template('register.html', form=form)
+        
+#         otp = generateOTP()
+         
+#         msg = Message(subject='Verify Your Email',
+#                   recipients=[email])
+#         msg.body = f"This mail is for verification please enter the otp {otp} on the page"
+#         try:
+#             app.mail.send(msg)
+#             print("Mail sent")
+#             print(otp)
+#             session['username'] = username
+#             session['email'] = email
+#             session['password'] = password
+#             session['otp'] = otp
+#             return redirect(url_for('main.verifyotp'))
+#         except Exception as e:
+#             print(f"Failed to send email: {e}", "error")
+#             return render_template('register.html', form=form)
+#     else:
+#         print("Form not validated")
+#     return render_template('register.html', form=form)
 
 
 @main.route('/verifyotp1', methods=['GET', 'POST'])
