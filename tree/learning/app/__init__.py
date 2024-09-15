@@ -11,5 +11,5 @@ def create_app():
     from tree.learning.app.controllers import front
     app.register_blueprint(front)
     app.register_blueprint(admin)
-
+    
     return app

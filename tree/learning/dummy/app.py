@@ -28,7 +28,7 @@ db = firebase.database()
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     # ... form validation and user creation logic
-    user = {'email':'atharvabhole239@gmail.com', 'password':'abcdefgh', 'username' : 'atharva_bhole'}
+    user = {'email':'person@gmail.com', 'password':'abcdefgh', 'username' : 'atharva_bhole'}
     # Create a unique key for the user's data
     user_key = db.child("persons").push(user).key
     # ... other success handling, like creating a session or redirecting
@@ -37,7 +37,7 @@ def register():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     # ... login form processing
-    email = 'atharvabhole239@gmail.com'
+    email = 'person@gmail.com'
     password= 'abcdefgh'
 
     # Authenticate with Firebase
