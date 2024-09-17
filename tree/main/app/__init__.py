@@ -2,12 +2,10 @@ from flask import Flask
 from app.models import db
 from dotenv import load_dotenv
 from flask_mail import Mail
-from flask_bcrypt import Bcrypt
 import os
 
 load_dotenv()
 
-bcrypt = Bcrypt()
 mail = Mail()
 def create_app():
     app = Flask(__name__)
@@ -25,12 +23,10 @@ def create_app():
     
     mail.init_app(app)
     db.init_app(app)
-    bcrypt.init_app(app)
     from app.routes import main
     
     app.register_blueprint(main)
     
-    app.extensions['bcrypt'] = bcrypt
     app.mail = mail
 
     return app
