@@ -3,6 +3,7 @@ from app.models import db, Users
 from flask_mail import Message
 from flask import current_app as app
 import random
+import nexmo
 from . import firebase as fb
 from app.forms import LoginForm, RegisterForm, VerifyForm
 
@@ -28,9 +29,9 @@ def firstpage():
     user = session.get('user')
     return render_template('firstpage.html', user=user)
 
-
-@main.route('/login', methods=['GET', 'POST'])
-def login():
+# Firebase Login
+#@main.route('/login', methods=['GET', 'POST'])
+#def login():
     form = LoginForm()
     if form.validate_on_submit():
         email = form.email.data
@@ -56,9 +57,9 @@ def login():
             return "<h1>Please Verify Your Mail</h1>"
     return render_template("login.html", form=form)
 
-
-@main.route('/register', methods=['GET','POST'])
-def register():
+# Firebase Register
+#@main.route('/register', methods=['GET','POST'])
+#def register():
     form = RegisterForm()
     if form.validate_on_submit():
         email = form.email.data
@@ -75,44 +76,44 @@ def register():
     return render_template('register.html', form=form)
         
 
-# @main.route('/register', methods=['GET', 'POST'])
-# def register():
-#     form = RegisterForm()
-#     if form.validate_on_submit():
-#         username = form.username.data
-#         email = form.email.data
-#         password = form.password.data
+@main.route('/register', methods=['GET', 'POST'])
+def register():
+    form = RegisterForm()
+    if form.validate_on_submit():
+        username = form.name.data
+        email = form.email.data
+        password = form.password.data
         
-#         if not username or not email or not password:
-#             print("All fields must be filled out.", "error")
-#             return render_template('register.html', form=form)
+        if not username or not email or not password:
+            print("All fields must be filled out.", "error")
+            return render_template('register.html', form=form)
         
-#         sender = app.config.get('MAIL_USERNAME')  
+        sender = app.config.get('MAIL_USERNAME')  
         
-#         if sender is None:
-#             print("Mail sender is not configured.", "error")
-#             return render_template('register.html', form=form)
+        if sender is None:
+            print("Mail sender is not configured.", "error")
+            return render_template('register.html', form=form)
         
-#         otp = generateOTP()
+        otp = generateOTP()
          
-#         msg = Message(subject='Verify Your Email',
-#                   recipients=[email])
-#         msg.body = f"This mail is for verification please enter the otp {otp} on the page"
-#         try:
-#             app.mail.send(msg)
-#             print("Mail sent")
-#             print(otp)
-#             session['username'] = username
-#             session['email'] = email
-#             session['password'] = password
-#             session['otp'] = otp
-#             return redirect(url_for('main.verifyotp'))
-#         except Exception as e:
-#             print(f"Failed to send email: {e}", "error")
-#             return render_template('register.html', form=form)
-#     else:
-#         print("Form not validated")
-#     return render_template('register.html', form=form)
+        msg = Message(subject='Verify Your Email',
+                 recipients=[email])
+        msg.body = f"This mail is for verification please enter the otp {otp} on the page"
+        try:
+           app.mail.send(msg)
+           print("Mail sent")
+           print(otp)
+           session['username'] = username
+           session['email'] = email
+           session['password'] = password
+           session['otp'] = otp
+           return redirect(url_for('main.verifyotp'))
+        except Exception as e:
+            print(f"Failed to send email: {e}", "error")
+            return render_template('register.html', form=form)
+    else:
+        print("Form not validated")
+    return render_template('register.html', form=form)
 
 
 @main.route('/verifyotp1', methods=['GET', 'POST'])
