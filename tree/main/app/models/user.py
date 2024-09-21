@@ -1,15 +1,21 @@
 from . import db
 from itsdangerous import URLSafeTimedSerializer as Serializer
 from flask import current_app as app
+from sqlalchemy import Sequence, func
+import re
 
 
 class Users(db.Model):
-    
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(length=255), nullable=False, unique=True)
+    __tablename__ = "users"
+    id = db.Column(db.String, primary_key=True)
+    gender = db.Column(db.String(length=1))
+    address = db.Column(db.String(length=255))
+    mobile = db.Column(db.String(length=15))
+    name = db.Column(db.String(length=255), nullable=False, unique=True)
     email = db.Column(db.String(length=255), nullable=False, unique=True)
     password = db.Column(db.String(length=255), nullable=False)
-    is_verified = db.Column(db.Boolean(), default=False)
+    mob_verified = db.Column(db.Boolean(), default=False)
+    email_verified = db.Column(db.Boolean(), default=False)
 
     def get_verification_token(self, expires_sec=3600):
         secret_key = app.config['SECRET_KEY']
@@ -34,3 +40,14 @@ class Users(db.Model):
 
     def __repr__(self):
         return f"User('{self.username}', '{self.email}')"
+    
+    @staticmethod
+    def generate_custom_id():
+        # Get the next value from the PostgreSQL sequence
+        next_val = db.session.execute(Sequence('anfa_id_seq'))
+        
+        # Format it with the prefix and leading zeros
+        custom_id = f"ANFA{next_val:03d}"
+        return custom_id
+
+    # Override the 'before_insert' event to set the ID

@@ -1,0 +1,9 @@
+Name
+id  Format(AN FA 000 1)
+Gender
+Branch
+Address
+Mobile No. along with verification
+Email  along with verification
+
+Message will contain all the details
